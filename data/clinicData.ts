@@ -104,29 +104,29 @@ export const services = {
       id: "t1",
       title: "General Consultation",
       description: "Comprehensive health assessment and diagnosis for your pet.",
-      price: "₹300",
-      isFree: false
+      price: "Free",
+      isFree: true
     },
     {
       id: "t2",
       title: "Health Check-up",
       description: "Complete physical examination including vital signs monitoring.",
       price: "₹500",
-      isFree: false
+      isFree: true
     },
     {
       id: "t3",
       title: "Disease Treatment",
       description: "Diagnosis and treatment for all general diseases and infections.",
-      price: "Varies",
-      isFree: false
+      price: "Free",
+      isFree: true
     },
     {
       id: "t4",
       title: "Deworming",
       description: "Internal parasite treatment for dogs and cats of all ages.",
-      price: "₹200",
-      isFree: false
+      price: "Free",
+      isFree: true
     }
   ],
   surgery: [
@@ -134,16 +134,16 @@ export const services = {
       id: "s1",
       title: "Neutering / Spaying",
       description: "Safe and professional sterilization surgery with post-op care.",
-      price: "₹3,000 - ₹5,000",
-      isFree: false,
+      price: "Free",
+      isFree: true,
       note: "Based on pet size"
     },
     {
       id: "s2",
       title: "Castration",
       description: "Male pet sterilization performed by experienced surgeons.",
-      price: "₹2,500 - ₹4,000",
-      isFree: false,
+      price: "Free",
+      isFree: true,
       note: "Based on pet size"
     },
     {
@@ -151,7 +151,7 @@ export const services = {
       title: "Tumor Removal",
       description: "Surgical removal of tumors with biopsy option available.",
       price: "Consultation required",
-      isFree: false,
+      isFree: true,
       note: "External specialist may be required"
     }
   ]

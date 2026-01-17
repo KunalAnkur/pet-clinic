@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { clinicInfo } from "@/data/clinicData";
 import heroImage from "@/assets/hero-image.jpg";
+import clinicImage from "@/assets/clinic-banner.jpeg";
 import { connectDatabase } from "@/lib/database";
 import "@/models"; // Initialize models
 import { Doctor } from "@/models/Doctor";
@@ -57,7 +58,7 @@ export default async function Home() {
         <div className="absolute inset-0 z-0">
           <div className="relative w-full h-full">
             <Image 
-              src={heroImage} 
+              src={clinicImage} 
               alt="Veterinary care" 
               className="object-cover"
               fill

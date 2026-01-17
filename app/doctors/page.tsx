@@ -1,16 +1,40 @@
-"use client";
-
 import { Layout } from "@/components/layout/Layout";
 import { DoctorCard } from "@/components/cards/DoctorCard";
-import { useDoctors } from "@/hooks/use-doctors";
 import { Users, Award, Heart } from "lucide-react";
+import { connectDatabase } from "@/lib/database";
+import "@/models"; // Initialize models
+import { Doctor } from "@/models/Doctor";
 
-export default function Doctors() {
-  const { data: doctors = [], isLoading } = useDoctors();
+async function getDoctors() {
+  try {
+    await connectDatabase();
+    const doctors = await (Doctor as any).findAll({
+      order: [['id', 'ASC']],
+    });
+
+    // Parse JSON strings back to arrays
+    const formattedDoctors = doctors.map((doctor: any) => {
+      const doctorData = doctor.toJSON ? doctor.toJSON() : doctor;
+      return {
+        ...doctorData,
+        timings: doctorData.timings ? JSON.parse(doctorData.timings) : [],
+        availableDays: doctorData.availableDays ? JSON.parse(doctorData.availableDays) : [],
+      };
+    });
+
+    return formattedDoctors;
+  } catch (error) {
+    console.error("Error fetching doctors:", error);
+    return [];
+  }
+}
+
+export default async function Doctors() {
+  const doctors = await getDoctors();
   
   // Separate internal doctors from external specialist
-  const internalDoctors = doctors.filter(d => !d.isExternal);
-  const externalSpecialist = doctors.find(d => d.isExternal);
+  const internalDoctors = doctors.filter((d: any) => !d.isExternal);
+  const externalSpecialist = doctors.find((d: any) => d.isExternal);
 
   return (
     <Layout>
@@ -33,7 +57,7 @@ export default function Doctors() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { icon: Users, value: `${internalDoctors.length}+`, label: "Experienced Doctors" },
-              { icon: Award, value: `${internalDoctors.reduce((sum, d) => sum + d.experience, 0)}+`, label: "Years Combined Experience" },
+              { icon: Award, value: `${internalDoctors.reduce((sum: number, d: any) => sum + d.experience, 0)}+`, label: "Years Combined Experience" },
               { icon: Heart, value: "10,000+", label: "Happy Pets Treated" },
             ].map((stat, idx) => (
               <div 
@@ -62,14 +86,10 @@ export default function Doctors() {
             In-House Veterinarians
           </h2>
           
-          {isLoading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading doctors...</p>
-            </div>
-          ) : internalDoctors.length > 0 ? (
+          {internalDoctors.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                {internalDoctors.map((doctor) => (
+                {internalDoctors.map((doctor: any) => (
                   <DoctorCard key={doctor.id} {...doctor} />
                 ))}
               </div>

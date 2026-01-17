@@ -1,9 +1,17 @@
+"use client";
+
 import { Layout } from "@/components/layout/Layout";
 import { DoctorCard } from "@/components/cards/DoctorCard";
-import { doctors, externalSurgeon } from "@/data/clinicData";
+import { useDoctors } from "@/hooks/use-doctors";
 import { Users, Award, Heart } from "lucide-react";
 
 export default function Doctors() {
+  const { data: doctors = [], isLoading } = useDoctors();
+  
+  // Separate internal doctors from external specialist
+  const internalDoctors = doctors.filter(d => !d.isExternal);
+  const externalSpecialist = doctors.find(d => d.isExternal);
+
   return (
     <Layout>
       {/* Hero */}
@@ -24,8 +32,8 @@ export default function Doctors() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: Users, value: "3+", label: "Experienced Doctors" },
-              { icon: Award, value: "35+", label: "Years Combined Experience" },
+              { icon: Users, value: `${internalDoctors.length}+`, label: "Experienced Doctors" },
+              { icon: Award, value: `${internalDoctors.reduce((sum, d) => sum + d.experience, 0)}+`, label: "Years Combined Experience" },
               { icon: Heart, value: "10,000+", label: "Happy Pets Treated" },
             ].map((stat, idx) => (
               <div 
@@ -54,39 +62,53 @@ export default function Doctors() {
             In-House Veterinarians
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {doctors.map((doctor) => (
-              <DoctorCard key={doctor.id} {...doctor} />
-            ))}
-          </div>
-
-          {/* External Specialist */}
-          <div className="max-w-2xl mx-auto">
-            <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">
-              Visiting Specialist
-            </h2>
-            <div className="bg-card rounded-2xl shadow-card p-8 border-2 border-dashed border-primary/30">
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Award className="w-12 h-12 text-primary" />
-                </div>
-                <div className="flex-1 text-center md:text-left">
-                  <h3 className="font-heading text-xl font-bold text-foreground mb-2">
-                    {externalSurgeon.name}
-                  </h3>
-                  <p className="text-primary font-medium mb-2">
-                    {externalSurgeon.specialty}
-                  </p>
-                  <p className="text-muted-foreground text-sm mb-3">
-                    {externalSurgeon.bio}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-medium">Availability:</span> On-call for complex surgeries
-                  </p>
-                </div>
-              </div>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading doctors...</p>
             </div>
-          </div>
+          ) : internalDoctors.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                {internalDoctors.map((doctor) => (
+                  <DoctorCard key={doctor.id} {...doctor} />
+                ))}
+              </div>
+
+              {/* External Specialist */}
+              {externalSpecialist && (
+                <div className="max-w-2xl mx-auto">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">
+                    Visiting Specialist
+                  </h2>
+                  <div className="bg-card rounded-2xl shadow-card p-8 border-2 border-dashed border-primary/30">
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                      <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Award className="w-12 h-12 text-primary" />
+                      </div>
+                      <div className="flex-1 text-center md:text-left">
+                        <h3 className="font-heading text-xl font-bold text-foreground mb-2">
+                          {externalSpecialist.name}
+                        </h3>
+                        <p className="text-primary font-medium mb-2">
+                          {externalSpecialist.specialty}
+                        </p>
+                        <p className="text-muted-foreground text-sm mb-3">
+                          {externalSpecialist.bio}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium">Availability:</span> On-call for complex surgeries
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No doctors available at the moment.</p>
+            </div>
+          )}
         </div>
       </section>
 

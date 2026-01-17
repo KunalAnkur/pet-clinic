@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
 import { Calendar, Clock, Award, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,13 +10,13 @@ import { cn } from "@/lib/utils";
 interface DoctorCardProps {
   id: number;
   name: string;
-  photo: string;
+  photo: string | null;
   qualification: string;
   experience: number;
   specialty: string;
   timings: string[];
   availableDays: string[];
-  bio: string;
+  bio: string | null;
   variant?: "default" | "compact";
 }
 
@@ -29,6 +33,8 @@ export function DoctorCard({
   variant = "default",
 }: DoctorCardProps) {
   const isCompact = variant === "compact";
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <div
@@ -44,11 +50,34 @@ export function DoctorCard({
           isCompact ? "w-32 shrink-0" : "h-48 md:h-56"
         )}
       >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/20 flex items-center justify-center">
-            <Stethoscope className="w-12 h-12 md:w-16 md:h-16 text-primary" />
+        {photo && !imageError ? (
+          <>
+            <Image
+              src={photo}
+              alt={name}
+              fill
+              className={cn(
+                "object-cover transition-opacity duration-300",
+                imageLoaded ? "opacity-100" : "opacity-0"
+              )}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+            />
+            {!imageLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Stethoscope className="w-12 h-12 md:w-16 md:h-16 text-primary" />
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/20 flex items-center justify-center">
+              <Stethoscope className="w-12 h-12 md:w-16 md:h-16 text-primary" />
+            </div>
           </div>
-        </div>
+        )}
         <div className="absolute top-3 right-3 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-semibold">
           {experience}+ years
         </div>

@@ -1,9 +1,9 @@
 // Static clinic data for the veterinary website
 
 export const clinicInfo = {
-  name: "PawCare Veterinary Clinic",
+  name: "Pet Clinic Bokaro",
   tagline: "Compassionate Care for Your Furry Friends",
-  address: "123 Main Road, Sector 4, Bokaro Steel City, Jharkhand 827004",
+  address: "Chas block, Chas, Bokaro Steel City, Jharkhand 827013",
   phone: "+91 98765 43210",
   email: "contact@pawcarebokaro.com",
   workingHours: {

@@ -13,10 +13,42 @@ import {
   Clock,
   Users
 } from "lucide-react";
-import { doctors, clinicInfo } from "@/data/clinicData";
+import { clinicInfo } from "@/data/clinicData";
 import heroImage from "@/assets/hero-image.jpg";
+import { connectDatabase } from "@/lib/database";
+import "@/models"; // Initialize models
+import { Doctor } from "@/models/Doctor";
 
-export default function Home() {
+async function getDoctors() {
+  try {
+    await connectDatabase();
+    const doctors = await (Doctor as any).findAll({
+      order: [['id', 'ASC']],
+    });
+
+    // Parse JSON strings back to arrays
+    const formattedDoctors = doctors.map((doctor: any) => {
+      const doctorData = doctor.toJSON ? doctor.toJSON() : doctor;
+      return {
+        ...doctorData,
+        timings: doctorData.timings ? JSON.parse(doctorData.timings) : [],
+        availableDays: doctorData.availableDays ? JSON.parse(doctorData.availableDays) : [],
+      };
+    });
+
+    return formattedDoctors;
+  } catch (error) {
+    console.error("Error fetching doctors:", error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const doctors = await getDoctors();
+
+  // Show only first 3 doctors on homepage
+  const featuredDoctors = doctors.slice(0, 3);
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -174,11 +206,17 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {doctors.map((doctor) => (
-              <DoctorCard key={doctor.id} {...doctor} />
-            ))}
-          </div>
+          {featuredDoctors.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredDoctors.map((doctor: any) => (
+                <DoctorCard key={doctor.id} {...doctor} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No doctors available at the moment.</p>
+            </div>
+          )}
 
           <div className="text-center mt-10">
             <Button asChild variant="outline" size="lg">
@@ -206,7 +244,7 @@ export default function Home() {
               <ArrowRight className="w-5 h-5" />
             </Link>
           </Button>
-    </div>
+        </div>
       </section>
     </Layout>
   );

@@ -1,12 +1,9 @@
-import { Suspense } from "react";
-import { BookClient } from "./BookClient";
-import { connectDatabase } from "@/lib/database";
+import { NextResponse } from "next/server";
 import "@/models"; // Initialize models
 import { Doctor } from "@/models/Doctor";
 
-async function getDoctors() {
+export async function GET() {
   try {
-    await connectDatabase();
     const doctors = await (Doctor as any).findAll({
       order: [['id', 'ASC']],
     });
@@ -21,19 +18,12 @@ async function getDoctors() {
       };
     });
 
-    return formattedDoctors;
+    return NextResponse.json(formattedDoctors);
   } catch (error) {
     console.error("Error fetching doctors:", error);
-    return [];
+    return NextResponse.json(
+      { error: "Failed to fetch doctors" },
+      { status: 500 }
+    );
   }
-}
-
-export default async function Book() {
-  const doctors = await getDoctors();
-
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <BookClient doctors={doctors} />
-    </Suspense>
-  );
 }

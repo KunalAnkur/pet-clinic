@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { doctors, externalSurgeon, serviceCategories } from "@/data/clinicData";
+import { serviceCategories } from "@/data/clinicData";
 import {
   Syringe,
   Stethoscope,
@@ -64,11 +64,30 @@ const serviceIcons: Record<ServiceCategory, typeof Syringe> = {
   surgery: Scissors,
 };
 
-export function BookClient() {
+interface Doctor {
+  id: number;
+  name: string;
+  photo: string | null;
+  qualification: string;
+  experience: number;
+  specialty: string;
+  phone: string | null;
+  timings: string[];
+  availableDays: string[];
+  bio: string | null;
+  isExternal: boolean;
+}
+
+interface BookClientProps {
+  doctors: Doctor[];
+}
+
+export function BookClient({ doctors }: BookClientProps) {
   const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [bookingId, setBookingId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [bookingData, setBookingData] = useState<BookingData>({
     service: "",
@@ -96,13 +115,17 @@ export function BookClient() {
     }
   }, [searchParams]);
 
+  // Separate internal doctors from external specialist
+  const internalDoctors = doctors.filter(d => !d.isExternal);
+  const externalSpecialist = doctors.find(d => d.isExternal);
+
   const selectedDoctor = bookingData.doctorId 
-    ? [...doctors, externalSurgeon].find(d => d.id === bookingData.doctorId)
+    ? doctors.find(d => d.id === bookingData.doctorId)
     : null;
 
   const availableDoctors = bookingData.service === "surgery" 
-    ? [...doctors.filter(d => d.specialty.toLowerCase().includes("surgery")), externalSurgeon]
-    : doctors;
+    ? [...internalDoctors.filter(d => d.specialty.toLowerCase().includes("surgery")), ...(externalSpecialist ? [externalSpecialist] : [])]
+    : internalDoctors;
 
   const canProceed = () => {
     switch (currentStep) {
@@ -127,11 +150,46 @@ export function BookClient() {
     }
   };
 
-  const handleConfirm = () => {
-    // Generate random booking ID
-    const id = `BK${Math.floor(1000 + Math.random() * 9000)}`;
-    setBookingId(id);
-    setBookingComplete(true);
+  const handleConfirm = async () => {
+    if (!bookingData.date || !bookingData.doctorId) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          service: bookingData.service,
+          doctorId: bookingData.doctorId,
+          date: bookingData.date.toISOString(),
+          timeSlot: bookingData.timeSlot,
+          ownerName: bookingData.ownerName,
+          phone: bookingData.phone,
+          petType: bookingData.petType,
+          breed: bookingData.breed || undefined,
+          age: bookingData.age || undefined,
+          notes: bookingData.notes || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create booking");
+      }
+
+      const booking = await response.json();
+      setBookingId(booking.bookingId);
+      setBookingComplete(true);
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      alert(error instanceof Error ? error.message : "Failed to create booking. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (bookingComplete) {
@@ -314,37 +372,43 @@ export function BookClient() {
                   <h2 className="font-heading text-xl font-bold text-foreground mb-6">
                     Select Doctor
                   </h2>
-                  <div className="space-y-4">
-                    {availableDoctors.map((doctor) => (
-                      <button
-                        key={doctor.id}
-                        onClick={() => setBookingData(prev => ({ ...prev, doctorId: doctor.id }))}
-                        className={cn(
-                          "w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 hover:shadow-card",
-                          bookingData.doctorId === doctor.id
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        )}
-                      >
-                        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                          <User className="w-7 h-7 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-foreground">{doctor.name}</h3>
-                          <p className="text-sm text-primary">{doctor.specialty}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {doctor.timings.length > 1 
-                              ? `${doctor.timings[0]} - ${doctor.timings[doctor.timings.length - 1]}`
-                              : doctor.timings[0]
-                            }
-                          </p>
-                        </div>
-                        {bookingData.doctorId === doctor.id && (
-                          <Check className="w-5 h-5 text-primary shrink-0" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
+                  {availableDoctors.length > 0 ? (
+                    <div className="space-y-4">
+                      {availableDoctors.map((doctor) => (
+                        <button
+                          key={doctor.id}
+                          onClick={() => setBookingData(prev => ({ ...prev, doctorId: doctor.id }))}
+                          className={cn(
+                            "w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 hover:shadow-card",
+                            bookingData.doctorId === doctor.id
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
+                          )}
+                        >
+                          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <User className="w-7 h-7 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-foreground">{doctor.name}</h3>
+                            <p className="text-sm text-primary">{doctor.specialty}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {doctor.timings.length > 1 
+                                ? `${doctor.timings[0]} - ${doctor.timings[doctor.timings.length - 1]}`
+                                : doctor.timings[0]
+                              }
+                            </p>
+                          </div>
+                          {bookingData.doctorId === doctor.id && (
+                            <Check className="w-5 h-5 text-primary shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No doctors available for this service.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -581,9 +645,16 @@ export function BookClient() {
                     onClick={handleConfirm}
                     variant="accent"
                     size="lg"
+                    disabled={isSubmitting}
                   >
-                    <Check className="w-4 h-4" />
-                    Confirm Booking
+                    {isSubmitting ? (
+                      <>Submitting...</>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Confirm Booking
+                      </>
+                    )}
                   </Button>
                 )}
               </div>

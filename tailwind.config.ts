@@ -42,6 +42,10 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        "teal-dark": "hsl(var(--teal-dark))",
+        "teal-light": "hsl(var(--teal-light))",
+        coral: "hsl(var(--coral))",
+        "coral-light": "hsl(var(--coral-light))",
       },
       borderRadius: {
         lg: "var(--radius)",

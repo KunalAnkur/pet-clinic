@@ -129,8 +129,8 @@ export default function Services() {
             </p>
             <p className="text-sm text-muted-foreground">
               For emergencies, please call us directly at{" "}
-              <a href="tel:+919876543210" className="text-primary font-semibold hover:underline">
-                +91 98765 43210
+              <a href="tel:+919973752779" className="text-primary font-semibold hover:underline">
+                +91 99737 52779
               </a>
             </p>
           </div>

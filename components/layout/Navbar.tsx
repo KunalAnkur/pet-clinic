@@ -30,7 +30,7 @@ export function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="font-heading font-bold text-lg md:text-xl text-foreground">
-                PawCare
+                Pet Clinic Bokaro
               </span>
               <span className="text-xs text-muted-foreground hidden sm:block">
                 Veterinary Clinic

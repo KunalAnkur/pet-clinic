@@ -45,12 +45,23 @@ DB_SSL="true"
 
 ### Supabase
 
+**IMPORTANT:** Use the **Connection Pooler** URL (port 6543), NOT the direct connection (port 5432) for serverless deployments!
+
 1. Go to Project Settings → Database
-2. Use the connection string under "Connection string" → "URI"
-3. Add `?sslmode=require` if not already included:
+2. Scroll to "Connection string" section
+3. **Select "Connection pooling" tab** (NOT "Direct connection")
+4. Choose "Session mode" or "Transaction mode"
+5. Copy the URI - it should look like:
    ```
-   postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres?sslmode=require
+   postgresql://postgres.xxxxx:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require
    ```
+   **Note:** The pooler URL uses `pooler.supabase.com` and port `6543`, NOT `db.xxxxx.supabase.co:5432`
+
+**Why use the pooler?**
+- ✅ Works reliably in serverless environments (Vercel, etc.)
+- ✅ Handles connection pooling automatically
+- ✅ Better for Next.js API routes
+- ✅ Direct connection (`db.xxxxx.supabase.co:5432`) often fails with `ENOTFOUND` in serverless
 
 ## Database Connection String Formats
 
@@ -60,11 +71,20 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/pet_clinic"
 DB_SSL="false"
 ```
 
-### Supabase
+### Supabase (Connection Pooler - RECOMMENDED)
 ```env
-DATABASE_URL="postgresql://postgres.xxxxx:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require"
+DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require"
 DB_SSL="true"
 ```
+
+**⚠️ DO NOT USE:** Direct connection URL (`db.xxxxx.supabase.co:5432`) - it will fail with `ENOTFOUND` in serverless deployments.
+
+**How to find the pooler URL:**
+1. Go to Supabase Dashboard → Project Settings → Database
+2. Scroll to "Connection string" section
+3. Click "Connection pooling" tab
+4. Select "Session mode" or "Transaction mode"
+5. Copy the URI (should have `pooler.supabase.com` and port `6543`)
 
 ### Railway
 ```env
@@ -80,7 +100,28 @@ DB_SSL="true"
 
 ## Common Issues
 
-### 1. ENETUNREACH Error (Network Unreachable)
+### 1. ENOTFOUND Error - "getaddrinfo ENOTFOUND db.xxxxx.supabase.co"
+
+**Problem:** The hostname `db.xxxxx.supabase.co` cannot be resolved. This happens when using Supabase's **direct connection** URL in serverless deployments.
+
+**Solutions:**
+- ✅ **USE CONNECTION POOLER URL** - This is the most common fix!
+  - Go to Supabase Dashboard → Settings → Database
+  - Click "Connection pooling" tab (NOT "Direct connection")
+  - Copy the pooler URL (should have `pooler.supabase.com` and port `6543`)
+  - Update your `DATABASE_URL` environment variable
+
+**Wrong (Direct Connection - Causes ENOTFOUND):**
+```
+postgresql://postgres:[PASSWORD]@db.xxxxx.supabase.co:5432/postgres
+```
+
+**Correct (Connection Pooler - Works in Serverless):**
+```
+postgresql://postgres.xxxxx:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require
+```
+
+### 2. ENETUNREACH Error (Network Unreachable)
 
 **Problem:** Deployment can't reach the database server.
 
@@ -159,14 +200,32 @@ If you see errors, check:
 ## Example: Supabase Setup
 
 1. Create a new Supabase project
-2. Go to Settings → Database
-3. Copy the connection string (URI format)
-4. In Vercel/Railway/Render, add:
-   ```env
-   DATABASE_URL="postgresql://postgres.xxxxx:[YOUR-PASSWORD]@aws-0-[region].pooler.supabase.com:6543/postgres?sslmode=require"
+2. Go to **Settings → Database**
+3. Scroll to **"Connection string"** section
+4. **IMPORTANT:** Click the **"Connection pooling"** tab (NOT "Direct connection")
+5. Select **"Session mode"** or **"Transaction mode"**
+6. Copy the URI connection string - it should look like:
    ```
-5. Deploy your app
-6. Run `npm run db:sync` and `npm run db:seed` (you can do this via SSH or a one-time script)
+   postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require
+   ```
+   **Key indicators it's the pooler URL:**
+   - Hostname contains `pooler.supabase.com` (NOT `db.xxxxx.supabase.co`)
+   - Port is `6543` (NOT `5432`)
+   - Username format: `postgres.xxxxx` (with dot, NOT `postgres`)
+
+7. In your deployment platform (Vercel/Railway/Render), add as `DATABASE_URL`:
+   ```env
+   DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[region].pooler.supabase.com:6543/postgres?sslmode=require"
+   ```
+
+8. Deploy your app
+
+9. After deployment, initialize the database:
+   - You can run `npm run db:sync` and `npm run db:seed` locally pointing to the production DB
+   - Or use Supabase SQL editor to run the schema and seed data
+   - Or create a one-time deployment script
+
+**⚠️ Common Mistake:** Using the direct connection URL (`db.xxxxx.supabase.co:5432`) will result in `ENOTFOUND` errors in serverless deployments. Always use the pooler URL!
 
 ## Troubleshooting
 

@@ -121,7 +121,7 @@ export default function Doctors() {
             </h2>
             <div className="prose prose-lg mx-auto text-muted-foreground">
               <p className="mb-4">
-                At PawCare, our veterinarians combine years of expertise with a genuine 
+                At Pet Clinic Bokaro, our veterinarians combine years of expertise with a genuine 
                 love for animals. Each doctor brings unique specializations, ensuring 
                 comprehensive care for every pet that walks through our doors.
               </p>

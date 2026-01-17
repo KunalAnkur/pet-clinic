@@ -57,7 +57,7 @@ export function DoctorCard({
               alt={name}
               fill
               className={cn(
-                "object-cover transition-opacity duration-300",
+                "object-contain transition-opacity duration-300",
                 imageLoaded ? "opacity-100" : "opacity-0"
               )}
               onLoad={() => setImageLoaded(true)}

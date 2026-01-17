@@ -13,7 +13,7 @@ export function Footer() {
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
                 <PawPrint className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="font-heading font-bold text-xl">PawCare</span>
+              <span className="font-heading font-bold text-xl">Pet Clinic Bokaro</span>
             </Link>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
               A trusted veterinary care center in Bokaro offering vaccination, 
@@ -108,7 +108,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-primary-foreground/10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-primary-foreground/50 text-sm">
-              © {new Date().getFullYear()} PawCare Veterinary Clinic. All rights reserved.
+              © {new Date().getFullYear()} Pet Clinic Bokaro. All rights reserved.
             </p>
             <p className="text-primary-foreground/50 text-sm flex items-center gap-1">
               Made with <span className="text-accent">❤</span> for your furry friends

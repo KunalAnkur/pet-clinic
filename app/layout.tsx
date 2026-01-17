@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PawCare Veterinary Clinic - Bokaro",
+  title: "Pet Clinic Bokaro - Bokaro",
   description: "Compassionate Care for Your Furry Friends. Providing vaccination, disease treatment, and surgery services under experienced veterinarians.",
 };
 

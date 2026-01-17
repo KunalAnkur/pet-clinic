@@ -32,7 +32,7 @@ import {
   Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, getDay } from "date-fns";
 
 type ServiceCategory = "vaccination" | "treatment" | "surgery";
 
@@ -424,7 +424,25 @@ export function BookClient({ doctors }: BookClientProps) {
                         mode="single"
                         selected={bookingData.date}
                         onSelect={(date) => setBookingData(prev => ({ ...prev, date }))}
-                        disabled={(date) => date < new Date() || date > new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
+                        disabled={(date) => {
+                          // Disable past dates
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          if (date < today) return true;
+                          
+                          // Disable dates more than 30 days in the future
+                          const maxDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                          if (date > maxDate) return true;
+                          
+                          // If doctor is selected, only enable days matching availableDays
+                          if (selectedDoctor && selectedDoctor.availableDays.length > 0) {
+                            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                            const dayOfWeek = dayNames[getDay(date)];
+                            return !selectedDoctor.availableDays.includes(dayOfWeek);
+                          }
+                          
+                          return false;
+                        }}
                         className="pointer-events-auto"
                       />
                     </div>

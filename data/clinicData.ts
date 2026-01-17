@@ -4,21 +4,21 @@ export const clinicInfo = {
   name: "Pet Clinic Bokaro",
   tagline: "Compassionate Care for Your Furry Friends",
   address: "Chas block, Chas, Bokaro Steel City, Jharkhand 827013",
-  phone: "+91 98765 43210",
-  email: "contact@pawcarebokaro.com",
+  phone: "+91 99737 52779",
+  email: "petclinicchasbokaro@gmail.com",
   workingHours: {
-    weekdays: "9:00 AM - 8:00 PM",
-    saturday: "9:00 AM - 6:00 PM",
-    sunday: "10:00 AM - 2:00 PM (Emergency Only)"
+    weekdays: "9:00 AM - 3:00 PM",
+    saturday: "3:00 AM - 3:00 PM",
+    sunday: "Closed"
   }
 };
 
 export const doctors = [
   {
     id: 1,
-    name: "Dr. Anjali Sharma",
+    name: "Dr. Ashok Kumar",
     photo: "/doctors/doctor1.jpg",
-    qualification: "BVSc & AH, MVSc (Medicine)",
+    qualification: "BVSc & AH",
     experience: 12,
     specialty: "Internal Medicine & Vaccination",
     timings: ["10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "2:00 PM", "2:30 PM", "3:00 PM"],

@@ -21,10 +21,17 @@ export const sequelize = new Sequelize(databaseUrl, {
     idle: 10000
   },
   dialectOptions: {
-    ssl: process.env.DB_SSL === 'true' ? {
+    // Enable SSL for cloud databases (Supabase, Railway, Render, etc.)
+    ssl: process.env.DB_SSL !== 'false' && (databaseUrl.includes('sslmode=require') || 
+          databaseUrl.includes('supabase') || 
+          databaseUrl.includes('railway') ||
+          databaseUrl.includes('render.com') ||
+          process.env.NODE_ENV === 'production') ? {
       require: true,
       rejectUnauthorized: false
-    } : false
+    } : false,
+    // Force IPv4 if IPv6 is causing issues
+    connect_timeout: 10,
   }
 });
 
